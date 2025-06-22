@@ -1,12 +1,4 @@
-﻿using System;
-using System.Net;
-using System.Net.Http;
-using System.Net.Sockets;
-using System.Text;
-using System.Threading.Tasks;
-using System.Collections.Generic;
-
-class Program
+﻿class Program
 {
     static async Task Main()
     {
