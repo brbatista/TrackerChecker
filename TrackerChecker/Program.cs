@@ -10,21 +10,47 @@ class Program
 {
     static async Task Main()
     {
-        var trackers = new List<string>
-        {
-            
-        };
+        Console.WriteLine("Paste your list of trackers below and press Enter when done.");
+        Console.WriteLine("Each tracker should be on its own line.");
+        Console.WriteLine("For example:");
+        Console.WriteLine("--------------------------------------------");
+        Console.WriteLine(
+            "http://tracker.bt4g.com:2095/announce\n" +
+            "https://tracker.yemekyedim.com:443/announce\n" +
+            "udp://open.stealth.si:80/announce");
+        Console.WriteLine("--------------------------------------------");
 
-        foreach (var tracker in trackers)
+        var trackers = new List<string>();
+        string? line;
+        while (true)
         {
-            if (tracker.StartsWith("http"))
+            line = Console.ReadLine();
+            if (string.IsNullOrWhiteSpace(line))
+                break;
+
+            trackers.Add(line.Trim());
+        }
+
+        Console.WriteLine($"\nChecking {trackers.Count} trackers...\n");
+
+        if (trackers.Any())
+        {
+            var checkTasks = trackers.Select(tracker =>
             {
-                await TrackerChecker.CheckHttpTracker(tracker);
-            }
-            else if (tracker.StartsWith("udp"))
-            {
-                await TrackerChecker.CheckUdpTracker(tracker);
-            }
+                if (tracker.StartsWith("http", StringComparison.OrdinalIgnoreCase))
+                    return TrackerChecker.CheckHttpTracker(tracker);
+                else if (tracker.StartsWith("udp", StringComparison.OrdinalIgnoreCase))
+                    return TrackerChecker.CheckUdpTracker(tracker);
+                else
+                {
+                    Console.WriteLine($"[SKIPPED] Unknown protocol: {tracker}");
+                    return Task.CompletedTask;
+                }
+            });
+
+            await Task.WhenAll(checkTasks);
+
+            Console.WriteLine("\n✅ Done!");
         }
     }
 }
